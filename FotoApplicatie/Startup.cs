@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FotoApplicatie.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,9 +16,11 @@ namespace FotoApplicatie
 {
     public class Startup
     {
+        private readonly IConfiguration _Configuration;
+
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            _Configuration = configuration;
         }
 
         public IConfiguration Configuration { get; }
@@ -31,7 +35,16 @@ namespace FotoApplicatie
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
+            services.AddMvc();
+            services.AddDbContext<DataAccess>(options =>
+            {
+                options.UseSqlServer(_Configuration.GetConnectionString("DefaultConnection"));
 
+            });
+            // Custom code for Data Access 
+            //var connection = @"Server=(localdb)\\mssqllocaldb;Database=FotoApp;Trusted_Connection=True;MultipleActiveResultSets=true";
+            ////var connection = @"Data Source=ATIQ;Initial Catalog=UserDB;Integrated Security=False;  Persist Security Info=False;User ID=sa;Password=*****";
+            //services.AddDbContext<DataAccess>(options => options.UseSqlServer(connection));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
