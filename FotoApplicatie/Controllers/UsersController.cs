@@ -22,12 +22,68 @@ namespace FotoApplicatie.Controllers
             _context = context;
             _env = env;
         }
-
-        // GET: Users
-        public async Task<IActionResult> Index()
+        // GET: Producten
+        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? page, int? id)
         {
-            return View(await _context.User.ToListAsync());
+        
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["PriceSortParm"] = sortOrder == "Price" ? "price_desc" : "Price";
+
+            if (searchString != null)
+            {
+                page = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+
+            ViewData["CurrentFilter"] = searchString;
+
+            var users = from s in _context.User
+                           select s;
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                users = users.Where(s => s.Name.Contains(searchString));
+                //(s => s.Category.Name.Contains(searchString) ||s =>s.Price.Contains(searchstring)) //kan ook is dan extra filter
+            }
+
+
+            switch (sortOrder)
+            {
+                case "Order by Headcategory":
+                    users = users.OrderByDescending(p => p.Email);
+                    break;
+                case "Order by id":
+                    users = users.OrderByDescending(p => p.UserId);
+                    break;
+
+                    //case "Price":
+                    //    products = products.OrderBy(s => s.Price);
+                    //    break;
+                    //case "price_desc":
+                    //    products = products.OrderByDescending(s => s.Price);
+                    //    break;
+                    //default:
+                    //    products = products.OrderBy(s => s.Description);
+                    //    break;
+            }
+            int pageSize = 5;          
+            return View(await PaginatedList<User>.CreateAsync(users.AsNoTracking(), page ?? 1, pageSize));
+
+            //return View(await products.AsNoTracking().ToListAsync());
+
+            //var warmeBakkerContext = _context.Products.Include(p => p.Category);
+            //return View(await warmeBakkerContext.ToListAsync());
         }
+        
+        
+        //// GET: Users
+        //public async Task<IActionResult> Index()
+        //{
+        //    return View(await _context.User.ToListAsync());
+        //}
 
         // GET: Users/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -229,7 +285,7 @@ namespace FotoApplicatie.Controllers
             {
                 await form.Files[0].CopyToAsync(stream);
             }
-
+            
             return RedirectToAction("Edit", new { id = Convert.ToString(form["UserId"]) });
         }
 

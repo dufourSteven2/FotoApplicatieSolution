@@ -1,15 +1,16 @@
-﻿@model IEnumerable<FotoApplicatie.Models.User>
+﻿@model PaginatedList<FotoApplicatie.Models.User>
 
 @{
+    //ViewData["Title"] = "TIndex";
     ViewData["Title"] = "Index";
 }
 
 <h2>Index</h2>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
+@*<p>
+        <a asp-action="Create">Create New</a>
+    </p>*@
+@*<table class="table">
     <thead>
         <tr>
             <th>
@@ -53,12 +54,110 @@
                         <img src="@ViewBag.ImgPath" alt="@item.UserId" height="100" width="100" /><br />
 
                     </td>*@
+@*<td>
+        <a asp-action="Edit" asp-route-id="@item.UserId">Edit</a> |
+        <a asp-action="Details" asp-route-id="@item.UserId">Details</a> |
+        <a asp-action="Delete" asp-route-id="@item.UserId">Delete</a>
+    </td>*@
+@*</tr>
+            }
+        </tbody>
+    </table>*@
+
+
+
+    <form asp-action="Index" method="get">
+        <div class="form-actions no-color">
+            <p>
+                Find by name: <input type="text" name="SearchString" value="@ViewData["currentFilter"]" />
+                <input type="submit" value="Search" class="btn btn-default" /> |
+                <a asp-action="Index">Back to Full List</a>
+            </p>
+        </div>
+    </form>
+
+    <table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">
+                    Naam User
+
+                </th>
+                <th scope="col">
+                    Intro
+                </th>
+                <th scope="col">
+                    Afbeelding
+                </th>
+                <th scope="col">
+                   Email
+
+                </th>
+                <th scope="col">
+                    Company
+
+                </th>
+            </tr>
+
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+
+
+            <tr itemscope>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.UserId">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.UserId">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.UserId">Delete</a>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Introduction)
+                </td>
+                <td asp-controller="Users" asp-action="UploadImage" method="post" enctype="multipart/form-data">
+                    @{
+                        string imageUrl = 
+                            "UserFiles/" + item.UserId+"/Image/"+ item.Introduction;//Introduction gebruikt om fotonaam meet te geven manueel niet automatisch tijdens create
+                    }
+                    <div style="height:100px;width:100px;
+                                background-image:url('@imageUrl');
+                                background-size: cover;"></div>
+                    @*<img src="@ViewBag.ImgPath" height="100" width="100" /><br />*@
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Email)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Company)
+                </td>
+                <td class="btn-group-lg">
+                    <a class="btn btn-primary" asp-action="Edit" asp-route-id="@item.UserId">Edit</a>
+                    <a class="btn btn-info" asp-action="Files" asp-route-id="@item.UserId">Details</a>
+                    <a class="btn btn-danger" asp-action="Delete" asp-route-id="@item.UserId">Delete</a>
                 </td>
             </tr>
-        }
-    </tbody>
-</table>
+            }
+        </tbody>
+    </table>
+
+    <p>
+        <a class="btn btn-success" asp-action="Create">Create New</a>
+    </p>
+
+    @{
+        var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+        var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+    }
+
+    <a asp-action="Index"
+       asp-route-sortOrder="@ViewData["CurrentSort"]"
+       asp-route-page="@(Model.PageIndex - 1)"
+       asp-route-currentFilter="@ViewData["CurrentFilter"]"
+       class="btn btn-default @prevDisabled">
+        Previous
+    </a>
+    <a asp-action="Index"
+       asp-route-sortOrder="@ViewData["CurrentSort"]"
+       asp-route-page="@(Model.PageIndex + 1)"
+       asp-route-currentFilter="@ViewData["CurrentFilter"]"
+       class="btn btn-default @nextDisabled">
+        Next
+    </a>

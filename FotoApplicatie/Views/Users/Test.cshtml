@@ -1,0 +1,26 @@
+﻿@model FotoApplicatie.Models.User
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h2>Details</h2>
+
+<<form asp-action="UploadImage" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <input type="hidden" asp-for="UserId" />
+        <label class="control-label">User Image</label><br />
+        <img src="@ViewBag.ImgPath" alt="@Model.Name" height="100" width="100" /><br />
+        @if (!string.IsNullOrEmpty(ViewBag.FileName))
+        {
+            <a href="~/Users/Download?img=@ViewBag.FileName&userId=@Model.UserId">Download</a><br />
+        }
+        <input type="file" name="user_image" id="user_image" />
+
+    </div>
+    
+</form>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.UserId">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>
